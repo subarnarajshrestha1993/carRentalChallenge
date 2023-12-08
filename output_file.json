@@ -1,0 +1,25 @@
+[
+    {
+        "id": "ABC123",
+        "start_timestamp": "1681722000",
+        "start_comments": "No issues - brand new and shiny!",
+        "end_timestamp": "1681743600",
+        "end_comments": "Car is missing both front wheels!",
+        "over_time": false,
+        "car_damaged": true
+    },
+    {
+        "id": "ABC456",
+        "start_timestamp": "1680343200",
+        "start_comments": "Small dent on passenger door",
+        "over_time": false,
+        "car_damaged": false
+    },
+    {
+        "id": "1680382800",
+        "end_timestamp": "0123499",
+        "end_comments": "",
+        "over_time": false,
+        "car_damaged": false
+    }
+]
