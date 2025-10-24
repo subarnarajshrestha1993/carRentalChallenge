@@ -2,6 +2,7 @@
 
 import json
 import datetime
+from pprint import pprint
 
 
 
@@ -57,6 +58,7 @@ def print_stats(aggregated_data):
 
 
     json_string = json.dumps(aggregated_data, indent=4)
+    pprint(json_string)
     with open('output_file.json', 'w') as fp:
         fp.write(json_string)
 
