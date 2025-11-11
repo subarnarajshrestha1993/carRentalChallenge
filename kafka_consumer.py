@@ -4,14 +4,14 @@ from database_connect import  get_db_conn, insert_record
 
 # Define the Kafka topic and broker address
 KAFKA_BROKER = 'localhost:9092'  # Adjust if your broker is on a different host
-TOPIC_NAME = 'test'  # Replace with your Kafka topic name
+TOPIC_NAME = 'testnov10'  # Replace with your Kafka topic name
 
 # Create a Kafka consumer instance
 consumer = KafkaConsumer(
     TOPIC_NAME,
     bootstrap_servers=[KAFKA_BROKER],
     # Deserialize messages from JSON format (adjust if your data is in a different format)
-    value_deserializer=lambda x: (x.decode('utf-8')),
+    value_deserializer=lambda x: json.loads(x.decode('utf-8')),
     auto_offset_reset='earliest',  # Start reading from the earliest available message
     enable_auto_commit=True,       # Automatically commit offsets
     group_id='my_consumer_group'   # Specify a consumer group ID
@@ -29,7 +29,9 @@ try:
         cnt += 1
         print(f"Received message: Topic={message.topic}, Partition={message.partition}, "
               f"Offset={message.offset}, Key={message.key}, Value={message.value}")
-        query = f"insert into users(id, name, status) values({cnt}, '{message.value}', 'Active')"
+        cnt = message.value['id']
+        name = message.value['name']
+        query = f"insert into users(id, name, status) values({cnt}, '{name}', 'Active')"
         insert_record(conn, query)
 except KeyboardInterrupt:
     print("Consumer stopped by user.")
