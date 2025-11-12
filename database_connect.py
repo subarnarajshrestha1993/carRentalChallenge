@@ -51,9 +51,9 @@ def insert_record(conn, query):
             mycursor.close()
 
 
-if __name__ == "__main__":
-    conn = get_db_conn()
-    query = "insert into users(id, name, status) values(1, 'Ram', 'Active')"
-    insert_record(conn, query)
-    if conn:
-        conn.close()
+# if __name__ == "__main__":
+#     conn = get_db_conn()
+#     query = "insert into users(id, name, status,) values(1, 'Ram', 'Active')"
+#     insert_record(conn, query)
+#     if conn:
+#         conn.close()

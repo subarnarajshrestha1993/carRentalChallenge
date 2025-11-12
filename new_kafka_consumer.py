@@ -20,11 +20,10 @@ consumer = KafkaConsumer(
 print(f"Listening for messages on topic: {TOPIC_NAME}")
 
 def insert_data(conn, data_dict):
-    cnt = data_dict['id']
-    name = data_dict['name']
+    id = data_dict['id']
     modified_time = data_dict['modified_time']
-    status = data_dict['status']
-    query = f"insert into users(id, name, status, modified_time) values({cnt}, '{name}', '{status}', '{modified_time}')"
+    data_dict = json.dumps(data_dict).replace("'", "''")
+    query = f"insert into new_users(unique_id, ip_address, json_record, modified_time) values({id}, 'localhost',  '{data_dict}', '{modified_time}')"
     print(f"query: {query}")
     insert_record(conn, query)
 
@@ -40,17 +39,16 @@ try:
             # cnt += 1
             print(f"Received message: Topic={message.topic}, Partition={message.partition}, "
                   f"Offset={message.offset}, Key={message.key}, Value={message.value}")
-            if len((message.value).keys()) < 4:
-                print(f"Not all columns are present. Invalid Record: {message.value}")
-                continue
+            # if len((message.value).keys()) < 4:
+            #     print(f"Not all columns are present. Invalid Record: {message.value}")
+            #     continue
             # cnt = message.value['id']
             # name = message.value['name']
             # modified_time = message.value['modified_time']
             # status =  message.value['status']
             data_dict = message.value
             insert_data(conn, data_dict)
-            if "Record" in (message.value).keys():
-                insert_data(conn,  (message.value)['Record'])
+
 
         except Exception as e:
             print(f"Exception: {e}")
