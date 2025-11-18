@@ -1,0 +1,5 @@
+db_host: localhost
+db_port: 6160
+db_user: subarna
+db_password: subarna
+database: StudentInformation
