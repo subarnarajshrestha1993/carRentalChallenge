@@ -33,18 +33,35 @@ def get_connection():
         print("Error:", e)
         return None
 
-
-
-if __name__ == '__main__':
-    conn = None
+def execute_query(conn, query):
+    cursor = None
     try:
-        conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * from kafka.TeslaInfo;")
-        print(cursor.fetchone())
+        cursor.execute(query)
+        if "select" in query.lower():
+            columns = [i[0]  for i in cursor.description]
+            return (columns, cursor.fetchall())
+        else:
+            print("insert completed")
+            conn.commit()
+
     except Exception as e:
         print(f"Exception occured: {e}")
     finally:
-        if conn:
-            conn.close()
+        if cursor:
+            cursor.close()
+
+
+# if __name__ == '__main__':
+#     conn = None
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         cursor.execute("SELECT * from kafka.TeslaInfo;")
+#         print(cursor.fetchone())
+#     except Exception as e:
+#         print(f"Exception occured: {e}")
+#     finally:
+#         if conn:
+#             conn.close()
 
