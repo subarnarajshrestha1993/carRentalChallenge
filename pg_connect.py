@@ -33,6 +33,7 @@ def get_connection():
         print("Error:", e)
         return None
 
+
 def execute_query(conn, query):
     cursor = None
     try:
