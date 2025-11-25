@@ -8,7 +8,7 @@ def transform():
     conn = None
     try:
         conn = get_connection()
-        select_query = "select * from kafka.TeslaInfo"
+        select_query = "select * from kafka.TeslaInfo;"
         columns, records = execute_query(conn, select_query)
         print(columns)
         pprint(records)
@@ -21,6 +21,7 @@ def transform():
         print(type(data_list))
         for row in data_list:
             # pprint(row)
+            string_prop = row['string_properties']
             if "json_record" in row:
                 json_record = json.loads((row['json_record']).replace('\'', '"'))
                 # pprint(json_record)
@@ -69,12 +70,52 @@ def transform():
             #TeslaUUID = row['TeslaUUID']
             #user_status = 'Active'
             # #modified_time = row['modified_time']
-            insert_query = (f"insert into kafka.TransformedTeslaInfo(car_uid, TeslaUUID, name, classification,model_carUid,  model_TeslaUUID, model_name, model_classification,"
-                            f" mobile1, mobile2,geoloc_elev,geoloc_s95,x_coordinates,y_coordinates) "
-                            f"values({car_uid}, '{TeslaUUID}','{name}', '{classification}', {model_carUid}, '{model_TeslaUUID}', '{model_name}', '{model_classification}', "
-                            f"'{mobile1}', '{mobile2}','{elev}','{geoLoc_s95}','{x_coordinates}','{y_coordinates}' )")
-            print(insert_query)
-            execute_query(conn, insert_query)
+            insert_query1 = f"""insert into kafka.car_info_dim(car_uid, name)
+            values({car_uid},'{name}' )
+            ON CONFLICT(car_uid)
+            DO UPDATE SET
+            name = EXCLUDED.name;
+            """
+
+
+            insert_query2 = f"""insert into kafka.model_info_dim(car_uid,model_carUid, model_name) 
+                values({car_uid},{model_carUid}, '{model_name}' )
+                ON CONFLICT(model_carUid, car_uid)
+                DO UPDATE SET
+                model_name = EXCLUDED.model_name
+            """
+
+            insert_query3 = (
+                f"insert into kafka.orders_fact(car_uid, TeslaUUID, classification,model_carUid,  model_TeslaUUID, model_classification) "
+                f"values({car_uid}, '{TeslaUUID}', '{classification}', {model_carUid}, '{model_TeslaUUID}', '{model_classification}')")
+
+
+            # if model_name  == "Tesla x4":
+            #     mobile_description  = f"mobile info for {model_name}"
+            #     insert_query1 = (
+            #         f"insert into mobile_data(car_uid, mobile_description, mobile1, mobile2) values({car_uid},"
+            #         f" '{mobile_description}','{mobile1}', '{mobile2}')")
+            # elif model_name  == "Tesla y4":
+            #     mobile_description  = f"mobile info for tesla model y: {model_name}"
+            #     insert_query1 = (
+            #         f"insert into mobile_data1(car_uid, mobile_description, mobile1, mobile2) values({car_uid},"
+            #         f" '{mobile_description}','{mobile1}', '{mobile2}')")
+            # else:
+            #     telephone_description  = f"telephone info for {model_name}"
+            #     insert_query1 = (
+            #         f"insert into telephone_data(car_uid, telephone_description, mobile1, mobile2) values({car_uid},"
+            #         f" '{telephone_description}','{mobile1}', '{mobile2}')")
+
+
+            print(insert_query1)
+            print(insert_query2)
+            print(insert_query3)
+            #print(insert_query1)
+
+            execute_query(conn, insert_query1)
+            execute_query(conn, insert_query2)
+            execute_query(conn, insert_query3)
+            #execute_query(conn, insert_query1)
     except Exception as e:
         if conn:
             conn.close()
