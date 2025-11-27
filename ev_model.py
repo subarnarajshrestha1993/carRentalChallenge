@@ -10,7 +10,7 @@ def transform():
     conn = None
     try:
         conn = get_connection()
-        select_query = "select * from kafka.TeslaInfo where event_Timestamp::date = current_Date -1};"
+        select_query = "select * from kafka.TeslaInfo where event_ts::date = CURRENT_DATE -7;"
         columns, records = execute_query(conn, select_query)
         print(columns)
         pprint(records)
@@ -21,6 +21,7 @@ def transform():
 
         pprint(data_list)
         print(type(data_list))
+        model_name = None
         for row in data_list:
             # pprint(row)
             # string_prop = row['string_properties']
@@ -71,14 +72,14 @@ def transform():
             #id = row['car_uid']
             #TeslaUUID = row['TeslaUUID']
             #user_status = 'Active'
-            # #modified_time = row['modified_time']
-            # insert_query1 = f"""insert into kafka.car_info_dim(car_uid, name)
-            # values({car_uid},'{name}' )
-            # ON CONFLICT(car_uid)
-            # DO UPDATE SET
-            # name = EXCLUDED.name;
-            # """
-            #
+            #modified_time = row['modified_time']
+            insert_query1 = f"""insert into kafka.car_info_dim(car_uid, name)
+            values({car_uid},'{name}' )
+            ON CONFLICT(car_uid)
+            DO UPDATE SET
+            name = EXCLUDED.name;
+            """
+
             #
             # insert_query2 = f"""insert into kafka.model_info_dim(car_uid,model_carUid, model_name)
             #     values({car_uid},{model_carUid}, '{model_name}' )
@@ -94,19 +95,40 @@ def transform():
 
             if model_name  == "jeff bezos":
                 # mobile_description  = f"mobile info for {model_name}"
-                insert_query1 = (
-                    f"insert into kafka.ev_jb_model(model_name, model_classification, mobile1, mobile2) values('{model_name}',"
-                    f" '{model_classification}','{mobile1}', '{mobile2}')")
-            elif model_name  == "jeff bezos1":
+                insert_query1 = f"""insert into kafka.ev_jb_model(model_name, car_uid, model_classification, mobile1, mobile2)
+                     values('{model_name}',
+                    {car_uid}, '{model_classification}','{mobile1}', '{mobile2}')
+                     ON CONFLICT(model_name)
+                        DO UPDATE SET
+                        model_classification = EXCLUDED.model_classification,
+                        mobile1 = EXCLUDED.mobile1,
+                        mobile2 = EXCLUDED.mobile2
+                        ;
+                    """
+            elif model_name == "jeff bezos1":
                 # mobile_description  = f"mobile info for tesla model y: {model_name}"
-                insert_query1 = (
-                    f"insert into kafka.ev_jb1_model(model_name, model_classification, mobile1, mobile2) values('{model_name}',"
-                    f" '{model_classification}','{mobile1}', '{mobile2}')")
+                insert_query1 = f"""insert into kafka.ev_jb1_model(model_name,car_uid, model_classification, mobile1, mobile2) 
+                values('{model_name}',
+                    {car_uid},'{model_classification}','{mobile1}', '{mobile2}')
+                      ON CONFLICT(model_name)
+                        DO UPDATE SET
+                        model_classification = EXCLUDED.model_classification,
+                        mobile1 = EXCLUDED.mobile1,
+                        mobile2 = EXCLUDED.mobile2
+                        ;
+                    """
             else:
             #     mobile_description  = f"model info for {model_name}"
-                insert_query1 = (
-                    f"insert into kafka.ev_other_model(model_name, model_classification, mobile1, mobile2) values('{model_name}',"
-                    f" '{model_classification}','{mobile1}', '{mobile2}')")
+                insert_query1 = f"""insert into kafka.ev_other_model(model_name,car_uid, model_classification, mobile1, mobile2) 
+                    values('{model_name}',
+                    {car_uid},{model_classification}','{mobile1}', '{mobile2}')
+                     ON CONFLICT(model_name)
+                        DO UPDATE SET
+                        model_classification = EXCLUDED.model_classification,
+                        mobile1 = EXCLUDED.mobile1,
+                        mobile2 = EXCLUDED.mobile2
+                        ;
+                    """
 
 
             print(insert_query1)
